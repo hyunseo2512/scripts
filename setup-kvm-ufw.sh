@@ -45,6 +45,6 @@ sudo virsh net-autostart default 2>/dev/null
 sudo virsh net-start default 2>/dev/null
 
 echo -e "${BLUE}--------------------------------------------------${NC}"
-echo -e "${GREEN}UFW 기반 가상화 설정이 완료되었습니다!${NC}"
+echo -e "${GREEN}UFW 기반 가상화 설정이 완료되었습니다.${NC}"
 echo -e "${RED}경고: ufw는 잘못 설정하면 외부 접속이 차단될 수 있으니 주의하세요.${NC}"
 echo -e "${BLUE}--------------------------------------------------${NC}"
