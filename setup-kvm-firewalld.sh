@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# 색상 정의 (출력 가독성용)
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
