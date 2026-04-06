@@ -4,8 +4,6 @@ GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}>>> 가상화 환경 및 네트워크 최적화 설정을 시작합니다...${NC}"
-
 # 1. 가상화 필수 패키지 설치
 echo -e "${GREEN}[1/5] 가상화 패키지 그룹 설치 중...${NC}"
 sudo dnf install -y @virtualization virt-manager qemu-guest-agent
