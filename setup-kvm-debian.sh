@@ -5,8 +5,6 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-echo -e "${BLUE}>>> [UFW 환경] 가상화 및 네트워크 설정을 시작합니다...${NC}"
-
 # 1. 패키지 설치
 echo -e "${GREEN}[1/5] 패키지 설치 (ufw 포함)...${NC}"
 sudo dnf install -y @virtualization virt-manager ufw
