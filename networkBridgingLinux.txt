@@ -1,0 +1,20 @@
+
+$su -
+
+$vi /etc/netplan/01-netcfg.yaml
+
+```
+network:
+  version: 2
+  ethernets:
+    enp3s0:      # 본인의 물리 랜카드 이름
+      dhcp4: no
+  bridges:
+    br0:
+      interfaces: [enp3s0]
+      dhcp4: yes # 브리지가 IP를 받도록 설정
+```
+
+$netplan apply
+
+ifconfig br0

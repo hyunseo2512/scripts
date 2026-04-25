@@ -5,44 +5,49 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-# 1. 패키지 설치
-echo -e "${GREEN}[1/5] 패키지 설치 (ufw 포함)...${NC}"
-sudo dnf install -y @virtualization virt-manager ufw
+# 1. Install Packages (APT)
+echo -e "${GREEN}[1/5] Installing packages (KVM, Libvirt, UFW)...${NC}"
+sudo apt update
+sudo apt install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-manager ufw
 
-# 2. 사용자 권한
+# 2. User Permissions
+# On Debian/Mint, the group is usually 'libvirt', but sometimes 'kvm' is also needed
 sudo usermod -aG libvirt $(whoami)
+sudo usermod -aG kvm $(whoami)
 
-# 3. IPv4 포워딩 활성화 (커널 레벨)
+# 3. IPv4 Forwarding
 echo "net.ipv4.ip_forward = 1" | sudo tee /etc/sysctl.d/99-kvm-forward.conf
 sudo sysctl -p /etc/sysctl.d/99-kvm-forward.conf
 
-# 4. UFW 상세 설정
-echo -e "${GREEN}[4/5] UFW 라우팅 및 마스커레이딩 설정 중...${NC}"
+# 4. UFW Configuration
+echo -e "${GREEN}[4/5] Configuring UFW routing and masquerading...${NC}"
 
-# 4-1. UFW 기본 포워딩 정책을 ACCEPT로 변경
+# 4-1. Change Default Forward Policy
 sudo sed -i 's/DEFAULT_FORWARD_POLICY="DROP"/DEFAULT_FORWARD_POLICY="ACCEPT"/' /etc/default/ufw
 
-# 4-2. NAT(마스커레이딩) 규칙 추가
-# 이미 규칙이 있는지 확인 후 없으면 삽입
+# 4-2. NAT (Masquerade) Rules
 if ! sudo grep -q "*nat" /etc/ufw/before.rules; then
-    sudo sed -i '1i # KVM NAT 규칙\n*nat\n:POSTROUTING ACCEPT [0:0]\n-A POSTROUTING -s 192.168.122.0/24 -j MASQUERADE\nCOMMIT\n' /etc/ufw/before.rules
+    # We use a temp file because inserting at the top (1i) of before.rules 
+    # can sometimes mess up header comments in Debian
+    sudo sed -i '1i # KVM NAT Rules\n*nat\n:POSTROUTING ACCEPT [0:0]\n-A POSTROUTING -s 192.168.122.0/24 -j MASQUERADE\nCOMMIT\n' /etc/ufw/before.rules
 fi
 
-# 4-3. 기본 허용 규칙 (SSH 등 방어)
+# 4-3. Allow Rules
 sudo ufw allow ssh
 sudo ufw allow in on virbr0
 sudo ufw allow out on virbr0
 
-# 5. 서비스 활성화
-echo -e "${GREEN}[5/5] 서비스 활성화 및 가상 네트워크 시작...${NC}"
+# 5. Service Activation
+echo -e "${GREEN}[5/5] Activating services and virtual network...${NC}"
 sudo systemctl enable --now ufw
 sudo systemctl enable --now libvirtd
 sudo ufw --force enable
 
+# Ensure the default network is active
 sudo virsh net-autostart default 2>/dev/null
 sudo virsh net-start default 2>/dev/null
 
 echo -e "${BLUE}--------------------------------------------------${NC}"
-echo -e "${GREEN}UFW 기반 가상화 설정이 완료되었습니다.${NC}"
-echo -e "${RED}경고: ufw는 잘못 설정하면 외부 접속이 차단될 수 있으니 주의하세요.${NC}"
+echo -e "${GREEN}KVM setup for Linux Mint is complete.${NC}"
+echo -e "${RED}Note: Please log out and log back in for group changes to work.${NC}"
 echo -e "${BLUE}--------------------------------------------------${NC}"
